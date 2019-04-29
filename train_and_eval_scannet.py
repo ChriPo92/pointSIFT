@@ -20,6 +20,7 @@ parser.add_argument('--data_path', default='data', help='scannet dataset path')
 parser.add_argument('--train_log_path', default='log/pointSIFT_train')
 parser.add_argument('--test_log_path', default='log/pointSIFT_test')
 parser.add_argument('--gpu_num', type=int, default=1, help='number of GPU to train')
+parser.add_argument("--ckpt_path", default=None, help="path to ckpt to load")
 
 # basic params..
 
@@ -33,6 +34,7 @@ TRAIN_LOG_PATH = FLAGS.train_log_path
 TEST_LOG_PATH = FLAGS.test_log_path
 GPU_NUM = FLAGS.gpu_num
 BATCH_PER_GPU = BATCH_SZ // GPU_NUM
+CKPT_PATH = FLAGS.ckpt_path
 
 NUM_CLASS = 21
 
@@ -224,6 +226,8 @@ class SegTrainer(object):
             config.log_device_placement = False
             best_acc = 0.0
             with tf.Session(config=config) as sess:
+                if CKPT_PATH:
+                    saver.restore(sess, CKPT_PATH)
                 train_writer = tf.summary.FileWriter(TRAIN_LOG_PATH, sess.graph)
                 evaluate_writer = tf.summary.FileWriter(TEST_LOG_PATH, sess.graph)
                 sess.run(tf.global_variables_initializer())
@@ -363,4 +367,4 @@ class SegTrainer(object):
 if __name__ == '__main__':
     trainer = SegTrainer()
     trainer.load_data()
-    trainer.training()
+    # trainer.training()
